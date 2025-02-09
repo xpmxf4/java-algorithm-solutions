@@ -14,7 +14,6 @@ public class Prob2475 {
                 .mapToInt(Integer::parseInt).toArray();
         int answer;
 
-
         // logic
         int sum = 0;
         for (int number : numbers)
