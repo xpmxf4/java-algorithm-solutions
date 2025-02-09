@@ -3,34 +3,36 @@ from collections import defaultdict
 import math
 import requests
 import re
-from concurrent.futures import ThreadPoolExecutor
 
 def get_problem_info(file_path):
     """파일명에서 문제 번호를 추출하고 solved.ac API를 통해 문제 정보를 가져옴"""
     file_name = os.path.basename(file_path)
-    # Prob1234.java 형식의 파일명에서 문제 번호 추출
     match = re.match(r'Prob(\d+)\.java', file_name)
     if not match:
+        print(f"파일명이 형식에 맞지 않음: {file_name}")  # 디버깅
         return None
 
     problem_number = match.group(1)
+    print(f"문제 번호 추출: {problem_number}")  # 디버깅
 
     try:
-        # solved.ac API를 통해 문제 정보 가져오기
+        print(f"solved.ac API 호출 시도: {problem_number}")  # 디버깅
         response = requests.get(f'https://solved.ac/api/v3/problem/show', params={'problemId': problem_number})
+        print(f"API 응답 상태: {response.status_code}")  # 디버깅
         if response.status_code == 200:
             data = response.json()
+            print(f"API 응답 데이터: {data}")  # 디버깅
             return {
                 'number': problem_number,
-                'title': data.get('titleKo', '제목 없음'),  # 한글 제목
-                'level': data.get('level', 0),  # 문제 난이도
-                'tags': [tag['displayNames'][0]['name'] for tag in data.get('tags', []) if tag['displayNames']],  # 문제 태그
+                'title': data.get('titleKo', '제목 없음'),
+                'level': data.get('level', 0),
+                'tags': [tag['displayNames'][0]['name'] for tag in data.get('tags', []) if tag['displayNames']],
                 'link': f'https://www.acmicpc.net/problem/{problem_number}'
             }
     except Exception as e:
-        print(f"문제 {problem_number} 정보 가져오기 실패: {e}")
+        print(f"API 호출 중 오류 발생: {e}")  # 디버깅
 
-    # API 호출 실패 시 기본 정보만 반환
+    print(f"기본 정보로 fallback: {problem_number}")  # 디버깅
     return {
         'number': problem_number,
         'title': f'Problem {problem_number}',
@@ -38,6 +40,38 @@ def get_problem_info(file_path):
         'tags': [],
         'link': f'https://www.acmicpc.net/problem/{problem_number}'
     }
+
+def get_problems_by_difficulty():
+    """소스 코드 디렉토리에서 난이도별 문제 목록과 개수를 수집"""
+    difficulties = ['bronze', 'silver', 'gold', 'platinum', 'diamond']
+    problem_counts = defaultdict(int)
+    problems_by_diff = defaultdict(lambda: defaultdict(list))
+
+    base_path = 'src/main/java/org/example'
+    print(f"기본 경로 탐색: {base_path}")  # 디버깅
+
+    for diff in difficulties:
+        diff_path = os.path.join(base_path, diff)
+        print(f"난이도 경로 확인: {diff_path}")  # 디버깅
+        if not os.path.exists(diff_path):
+            print(f"경로 없음: {diff_path}")  # 디버깅
+            continue
+
+        print(f"난이도 디렉토리 발견: {diff}")  # 디버깅
+        for problem_type in os.listdir(diff_path):
+            type_path = os.path.join(diff_path, problem_type)
+            print(f"유형 경로 확인: {type_path}")  # 디버깅
+            if os.path.isdir(type_path):
+                for file in os.listdir(type_path):
+                    print(f"파일 확인: {file}")  # 디버깅
+                    if file.endswith('.java') and file.startswith('Prob'):
+                        print(f"문제 파일 발견: {file}")  # 디버깅
+                        problem_counts[diff] += 1
+                        problems_by_diff[diff][problem_type].append(os.path.join(type_path, file))
+
+    print(f"최종 문제 수: {dict(problem_counts)}")  # 디버깅
+    print(f"최종 문제 목록: {dict(problems_by_diff)}")  # 디버깅
+    return problems_by_diff, problem_counts
 
 def create_pie_chart(counts):
     """문제 난이도별 개수를 시각화하는 원형 차트 SVG 생성"""
@@ -137,31 +171,6 @@ def format_problems_table(problems_dict):
         result += f"| [{prob['number']}]({prob['link']}) | {prob['title']} | {prob['type']} | {tags} |\n"
 
     return result
-
-def get_problems_by_difficulty():
-    """소스 코드 디렉토리에서 난이도별 문제 목록과 개수를 수집"""
-    difficulties = ['bronze', 'silver', 'gold', 'platinum', 'diamond']
-    problem_counts = defaultdict(int)
-    problems_by_diff = defaultdict(lambda: defaultdict(list))
-
-    # 소스 코드 디렉토리 탐색
-    base_path = 'src/main/java/org/example'
-    for diff in difficulties:
-        diff_path = os.path.join(base_path, diff)
-        if not os.path.exists(diff_path):
-            continue
-
-        # 각 난이도 디렉토리 내의 문제 유형별 디렉토리 탐색
-        for problem_type in os.listdir(diff_path):
-            type_path = os.path.join(diff_path, problem_type)
-            if os.path.isdir(type_path):
-                # Prob*.java 형식의 파일만 수집
-                for file in os.listdir(type_path):
-                    if file.endswith('.java') and file.startswith('Prob'):
-                        problem_counts[diff] += 1
-                        problems_by_diff[diff][problem_type].append(os.path.join(type_path, file))
-
-    return problems_by_diff, problem_counts
 
 def update_readme():
     """README.md 파일 업데이트"""
