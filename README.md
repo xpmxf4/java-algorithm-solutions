@@ -1,27 +1,27 @@
 # 알고리즘 문제 풀이
 
 ## 진행 상황
-{pie_chart}
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><text x="50" y="100">아직 풀은 문제가 없습니다</text></svg>
 
 ## 📊 해결한 문제 수
-- 총 문제 수: {total_problems}
-- 🥉 브론즈: {bronze_count}
-- 🥈 실버: {silver_count}
-- 🥇 골드: {gold_count}
-- 💎 플래티넘: {platinum_count}
-- 💫 다이아몬드: {diamond_count}
+- 총 문제 수: 0
+- 🥉 브론즈: 0
+- 🥈 실버: 0
+- 🥇 골드: 0
+- 💎 플래티넘: 0
+- 💫 다이아몬드: 0
 
 ## 🥉 브론즈
-{bronze_problems}
+아직 풀은 문제가 없습니다.
 
 ## 🥈 실버
-{silver_problems}
+아직 풀은 문제가 없습니다.
 
 ## 🥇 골드
-{gold_problems}
+아직 풀은 문제가 없습니다.
 
 ## 💎 플래티넘
-{platinum_problems}
+아직 풀은 문제가 없습니다.
 
 ## 💫 다이아몬드
-{diamond_problems}
+아직 풀은 문제가 없습니다.
