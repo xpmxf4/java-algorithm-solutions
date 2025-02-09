@@ -31,17 +31,31 @@ jobs:
           echo "Current directory structure:"
           ls -R src/main/java/org/example/
 
+      - name: Debug environment
+        run: |
+          pwd
+          ls -la
+          python --version
+
       - name: Update README
         run: |
-          python .github/scripts/update_readme.py
+          python -u .github/scripts/update_readme.py
 
-      - name: Show git status
+      - name: Check README content
         run: |
-          git status
+          echo "Checking if README.md exists:"
+          ls -l README.md || echo "README.md not found"
+          echo "Content of README.md:"
+          cat README.md || echo "Cannot read README.md"
 
-      - name: Commit and push if changed
+      - name: Commit and push changes
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
+          echo "Git status before add:"
+          git status
           git add README.md
+          echo "Git status after add:"
+          git status
+          git diff --cached
           git diff --cached --quiet || (git commit -m "Update README.md [skip ci]" && git push)
